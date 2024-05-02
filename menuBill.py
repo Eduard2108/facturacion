@@ -10,7 +10,7 @@ from iCrud import ICrud
 import datetime
 import time,os
 from functools import reduce
-
+from components import user_session
 path, _ = os.path.split(os.path.abspath(__file__))
 # Procesos de las Opciones del Menu Facturacion
 class CrudClients(ICrud):
@@ -181,7 +181,7 @@ class CrudSales(ICrud):
         func_instance = functions()
         text = "Borrar factura"
         gotoxy(1, 8);func_instance.print_in_frame(text, 3, len(text) + 40)
-        number_invoice = input(red_color + "Ingrese el número de la factura que desea eliminar")
+        number_invoice = input(red_color + "Ingrese el número de la factura que desea eliminar: ")
         delete_invo = functions()
         delete_invo.delete_invoice(number_invoice)
 
@@ -233,12 +233,20 @@ class CrudSales(ICrud):
             print(f"              sum Factura:{tot_invoices}")
             print(f"              reduce Facturas:{suma}")
         x = input("presione una tecla para continuar...")
+symbol = ''
+while True:  # strip() elimina los espacios en blanco al inicio y al final
+    symbol = input(green_color + "Ingresar simbolo del marco: ")
+    if len(symbol) == 1:  # Verifica que el símbolo ingresado tenga exactamente un carácter
+        break
+    else:
+        print("Por favor, ingrese solo un símbolo")
 
-#Menu Proceso Principal
-opc=''
-while opc !='4':  
-    borrarPantalla()      
-    menu_main = Menu("Menú Facturacion",["1) Clientes","2) Productos","3) Ventas","4) Salir"],20,10)
+Menu.symbol = symbol  # Almacena el símbolo en la variable de clase de la clase Menu
+
+opc = ''
+while opc != '4':
+    borrarPantalla()
+    menu_main = Menu("Menú Facturacion", ["1) Clientes", "2) Productos", "3) Ventas", "4) Salir"], 20, 10)
     opc = menu_main.menu()
     if opc == "1":
         opc1 = ''
@@ -317,8 +325,7 @@ while opc !='4':
         time.sleep(2)
     print("Regresando al menu Principal...")
     time.sleep(2)
+
 borrarPantalla()
-# user = functions()
-# user.user_session()
 input("Presione una tecla para salir...")
 borrarPantalla()

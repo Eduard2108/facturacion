@@ -6,24 +6,47 @@ import json
 import time
 from customer import RegularClient, VipClient
 from utilities import reset_color,red_color,green_color,yellow_color,blue_color,purple_color,cyan_color
+
 path, _ = os.path.split(os.path.abspath(__file__))
+def time_decorator(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        execution_time = end_time - start_time
+        rounded_time = round(execution_time, 2)
+        print(f"Has estado {rounded_time} segundos en este menú")
+        time.sleep(2)
+        return result  # Devuelve el resultado de la función decorada
+
+    return wrapper
+
+
+@time_decorator
+def user_session(self):
+    return "Sistema de Facturación by Eduard Rodríguez"
+    time.sleep(2)
+
 class Menu:
+    symbol = "*"
     def __init__(self,titulo="",opciones=[],col=6,fil=1):
         self.titulo=titulo
         self.opciones=opciones
         self.col=col
         self.fil=fil
-        
+
+    @time_decorator
     def menu(self):
         func_instance = functions()
-
-        gotoxy(1, 8);func_instance.print_in_frame(self.titulo,3, len(self.titulo) + 40)
-        self.col-=5
+        gotoxy(1, 8)
+        func_instance.print_in_frame(self.titulo, 3, len(self.titulo) + 40, Menu.symbol)
+        self.col -= 5
         for opcion in self.opciones:
-            self.fil +=1
-            gotoxy(self.col,self.fil); print(opcion)
-        gotoxy(self.col+5,self.fil+2)
-        opc = input(f"Elija opcion[1...{len(self.opciones)}]: ") 
+            self.fil += 1
+            gotoxy(self.col, self.fil)
+            print(yellow_color + opcion)
+        gotoxy(self.col + 5, self.fil + 2)
+        opc = input(f"Elija opcion[1...{len(self.opciones)}]: ")
         return opc
 class Valida:
     def solo_numeros(self,mensajeError,col,fil):
@@ -109,9 +132,9 @@ class Valida:
             return
         return True if len(card) == 16 and str(card).isdigit() else False
 class functions:
-    def print_in_frame(self, text, height, width):
+    def print_in_frame(self, text, height, width, symbol='*'):
         os.system('cls' if os.name == 'nt' else 'clear')
-        self.draw_frame(height, width, text)
+        self.draw_frame(height, width, symbol, text)
     def create_client(self):
         borrarPantalla()
         new_client = None
@@ -488,8 +511,13 @@ class functions:
         borrarPantalla()
         file_json = JsonFile(path + '/archivos/invoices.json')
         product_json = JsonFile(path + '/archivos/products.json')
-        invoice_number = int(invoice_number)
         valida = Valida()
+        while True:
+            if valida.only_numbers(invoice_number):
+                invoice_number = int(invoice_number)
+                break
+            else:
+                invoice_number = input("Ingrese un número valido de factura: ")
         try:
             invoices = file_json.read()
             products = product_json.read()
@@ -617,6 +645,7 @@ class functions:
         valida = Valida()
         if not valida.only_numbers(invoice_number):
             print("El número de factura debe ser un número")
+            time.sleep(2)
             return
 
         file_json = JsonFile(path + '/archivos/invoices.json')
@@ -625,6 +654,7 @@ class functions:
             invoices = file_json.read()
             if invoices is None:
                 print("No hay facturas para eliminar")
+                time.sleep(2)
                 time.sleep(2)
                 return
             for i, invoice in enumerate(invoices):
@@ -643,53 +673,21 @@ class functions:
             print(f"Error: {e}")
             time.sleep(2)
 
-    def draw_frame(self, height, width, text=None, i=0, j=0):
+    def draw_frame(self, height, width, symbol='*', text=None, i=0, j=0):
         if i == height:
             return
         if j == width:
             print()
-            self.draw_frame(height, width, text, i + 1, 0)
+            self.draw_frame(height, width, symbol, text, i + 1, 0)
         else:
             if i == 0 or i == height - 1 or j == 0 or j == width - 1:
-                print('*', end='')
+                print(blue_color + symbol, end='')
             else:
                 if text and i == height // 2 and j == (width - len(text)) // 2:
-                    print(text, end='')
+                    print(blue_color + text, end='')
                     j += len(text) - 1
                 else:
                     print(' ', end='')
-            self.draw_frame(height, width, text, i, j + 1)
-
-    def time_decorator(func):
-        def wrapper(*args, **kwargs):
-            start_time = time.time()
-            result = func(*args, **kwargs)
-            end_time = time.time()
-            execution_time = end_time - start_time
-            rounded_time = round(execution_time, 2)
-            print(f"Tiempo de ejecución del sistema: {rounded_time} segundos")
-            return result
-
-        return wrapper
-
-
-    @time_decorator
-    def user_session(self):
-        print("Sistema de Facturación by Eduard Rodríguez")
-        time.sleep(3)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            self.draw_frame(height, width, symbol, text, i, j + 1)
 
 
