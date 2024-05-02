@@ -118,8 +118,8 @@ class functions:
                         name = input("Ingresar un nombre valido: ")
                         bool_name = validated.only_letters(name)
                     elif bool_surname == False:
-                        name = input("Ingresar un apellido valido: ")
-                        bool_surname = validated.only_letters(name)
+                        surname = input("Ingresar un apellido valido: ")
+                        bool_surname = validated.only_letters(surname)
                     elif bool_dni == False:
                         dni = input("Ingresar un DNI valido: ")
                         bool_dni = validated.dni_valited(dni)
