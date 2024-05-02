@@ -73,7 +73,7 @@ class Valida:
         if dni is None:
             print("No se ha ingresado nada")
             return False
-        if not (len(dni) <= 10 and len(dni) > 9 and str(dni).isdigit()):
+        if not (len(dni) == 10 and str(dni).isdigit()):
             return False
         try:
             file_path = path + '/archivos/clients.json'
@@ -89,7 +89,19 @@ class Valida:
                 time.sleep(2)
                 return False
 
-        return True
+        # Verificación de dígitos de cédula ecuatoriana
+        coef = [2, 1, 2, 1, 2, 1, 2, 1, 2]
+        total = 0
+        for c, r in zip(dni[:9], coef):
+            suma = int(c) * r
+            total += suma if suma < 10 else suma - 9
+        check_digit = 10 - total % 10 if total % 10 != 0 else 0
+        if check_digit == int(dni[9]):
+            return True
+        else:
+            print("El DNI no es válido para Ecuador")
+            time.sleep(2)
+            return False
 
     def card_valited(self, card):
         if card is None:
@@ -243,46 +255,35 @@ class functions:
     def consult_client(self, dni=None):
         file_json = JsonFile(path + '/archivos/clients.json')
         valida = Valida()
-        if dni is None or dni == '':
-            try:
-                clients = file_json.read()
-                if clients is None:
-                    print("No hay clientes para consultar")
-                    time.sleep(2)
-                    return
-                num_clients = len(clients)
-                num_regular = len([client for client in clients if client['valor'] in [0, 0.1]])
-                num_vip = len([client for client in clients if client['valor'] == 10000])
-                print(f"Hay {num_clients} clientes en total.")
-                print(f"Hay {num_regular} clientes regulares.")
-                print(f"Hay {num_vip} clientes VIP.")
+        try:
+            clients = file_json.read()
+            if clients is None:
+                print("No hay clientes para consultar")
+                time.sleep(2)
+                return
+            if dni is None or dni == '':
+                borrarPantalla()
                 print("Información de todos los clientes:")
                 for client in clients:
                     for key, value in client.items():
                         print(f"{key}: {value}")
+                    if client['valor'] in [0, 0.1]:
+                        print("Tipo de cliente: Regular")
+                    elif client['valor'] == 10000:
+                        print("Tipo de cliente: VIP")
                     print("--------------------")
-                time.sleep(6)
+                print(f"Hay {len(clients)} clientes en total.")
+                time.sleep(7)
                 return
-            except json.JSONDecodeError:
-                print("Error al leer el archivo JSON")
-                time.sleep(2)
-            except Exception as e:
-                print(f"Error: {e}")
-                time.sleep(2)
-        else:
-            while True:
-                if not valida.only_numbers(dni):
-                    dni = input("Ingrese un DNI valido: ")
-                else:
-                    break
-            try:
-                clients = file_json.read()
-                if clients is None:
-                    print("No hay clientes para consultar")
-                    time.sleep(2)
-                    return
+            else:
+                while True:
+                    if not valida.only_numbers(dni):
+                        dni = input("Ingrese un DNI valido: ")
+                    else:
+                        break
                 for client in clients:
                     if client['dni'] == dni:
+                        borrarPantalla()
                         print("Información del cliente:")
                         for key, value in client.items():
                             print(f"{key}: {value}")
@@ -290,16 +291,16 @@ class functions:
                             print("Tipo de cliente: Regular")
                         elif client['valor'] == 10000:
                             print("Tipo de cliente: VIP")
-                        time.sleep(6)
+                        time.sleep(7)
                         return
                 print("No se ha encontrado al cliente")
                 time.sleep(2)
-            except json.JSONDecodeError:
-                print("Error al leer el archivo JSON")
-                time.sleep(2)
-            except Exception as e:
-                print(f"Error: {e}")
-                time.sleep(2)
+        except json.JSONDecodeError:
+            print("Error al leer el archivo JSON")
+            time.sleep(2)
+        except Exception as e:
+            print(f"Error: {e}")
+            time.sleep(2)
 
     def create_product(self, descripcion, precio, stock):
         file_json = JsonFile(path + '/archivos/products.json')
